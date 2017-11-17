@@ -33,12 +33,13 @@ services:
 
   web-service:
     container_name: web-service
-    build: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
+    build:
+      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
+      args:
+        - NODE_ENV=production
+        - REACT_APP_USERS_SERVICE_URL=${REACT_APP_USERS_SERVICE_URL}
     ports:
-      - '3007:3000' # expose ports - HOST:CONTAINER
-    environment:
-      - NODE_ENV=production
-      - REACT_APP_USERS_SERVICE_URL=${REACT_APP_USERS_SERVICE_URL}
+      - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
       metagenscope-service:
         condition: service_started
@@ -54,5 +55,8 @@ services:
     depends_on:
       metagenscope-service:
         condition: service_started
+      web-service:
+        condition: service_started
     links:
       - metagenscope-service
+      - web-service
