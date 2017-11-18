@@ -23,8 +23,8 @@ services:
       # Environment: development | testing | staging | production
       - APP_SETTINGS=development
       - SECRET_KEY=my_precious
-      - DATABASE_URL=postgres://postgres:postgres@metagenscope-db:5432/users_dev
-      - DATABASE_TEST_URL=postgres://postgres:postgres@metagenscope-db:5432/users_test
+      - DATABASE_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_test
     depends_on:
       metagenscope-db:
         condition: service_healthy
@@ -49,7 +49,7 @@ services:
   swagger:
     container_name: swagger
     build:
-      context: ../metagenscope-swagger
+      context: https://github.com/bchrobot/metagenscope-swagger.git
     ports:
       - '8080:8080' # expose ports - HOST:CONTAINER
     environment:

@@ -8,6 +8,7 @@ services:
     ports:
       - 5435:5432  # expose ports - HOST:CONTAINER
     environment:
+      # Pull these from .env
       - POSTGRES_USER
       - POSTGRES_PASSWORD
     healthcheck:
@@ -23,8 +24,8 @@ services:
       # Environment: development | testing | staging | production
       - APP_SETTINGS=production
       - SECRET_KEY
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/users_prod
-      - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/users_test
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
+      - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
     depends_on:
       metagenscope-db:
         condition: service_healthy
