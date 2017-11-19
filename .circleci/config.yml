@@ -39,20 +39,19 @@ jobs:
       - setup_remote_docker
 
       - run:
-          name: Start container
+          name: Build containers
           command: |
             set -x
-            docker-compose up --build -d
+            docker-compose -f docker-compose-ci.yml build
 
       # Run tests!
       - run:
           name: Run tests
           command: |
             set -x
-            export TEST_URL=`docker-machine ip`
-            docker-compose run metagenscope-service python manage.py test
-            npm test
+            export TEST_URL=http://nginx
+            docker-compose -f docker-compose-ci.yml run e2e sh test.sh
 
       - run:
           name: Stop container
-          command: docker-compose down
+          command: docker-compose -f docker-compose-ci.yml down
