@@ -35,7 +35,7 @@ jobs:
       # run tests!
       - run:
           name: run tests
-          command: docker-compose run metagenscope-service python manage.py test
+          command: sh test.sh
 
       - run:
           name: Stop container
