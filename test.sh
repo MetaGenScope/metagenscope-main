@@ -11,6 +11,9 @@ inspect() {
 docker-compose run metagenscope-service python manage.py test
 inspect $? metagenscope-service
 
+npm run test
+inspect $? e2e
+
 if [ -n "${fails}" ];
   then
     echo "Tests failed: ${fails}"

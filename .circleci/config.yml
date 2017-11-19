@@ -3,18 +3,16 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:jessie
+      - image: circleci/node:9.2.0-browsers
     environment:
-      REACT_APP_METAGENSCOPE_SERVICE_URL: http://emptyfish.net
+      TEST_URL: http://127.0.0.1
+      REACT_APP_METAGENSCOPE_SERVICE_URL: http://127.0.0.1
+      DISPLAY: ':99.0'
 
     working_directory: ~/repo
 
     steps:
       - checkout
-
-      - run:
-          name: Install curl
-          command: apt-get update; apt-get install -y curl
 
       - run:
           name: Install Docker Compose
@@ -30,6 +28,8 @@ jobs:
           name: Start container
           command: |
             set -x
+            sh -e /etc/init.d/xvfb start
+            sleep 3
             docker-compose up --build -d
 
       # run tests!
