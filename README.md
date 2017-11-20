@@ -8,6 +8,10 @@ MetaGenScope runs as a collection of microservices using Docker. This makes it v
     1. [Prerequisites](#prerequisites)
     1. [What's Included](#whats-included)
 1. [Running Locally](#running-locally)
+1. [Testing](#testing)
+    1. [Writing Tests](#writing-tests)
+    1. [Standalone](#standalone)
+    1. [Dockerized](#dockerized)
 1. [Deploying](#deploying)
 1. [Meta](#contributing)
 
@@ -82,7 +86,70 @@ Start the containers:
 $ docker-compose up -d
 ```
 
-And finally, connect to the machine at `https://192.168.99.100:5001/ping`.
+And finally, connect to the machine at `https://192.168.99.100/`.
+
+## Testing
+
+End-to-end tests live in `./e2e`:
+
+```sh
+$ cd e2e
+```
+
+To develop or run tests you will need to instal the node dependencies:
+
+```sh
+$ npm install
+```
+
+### Writing Tests
+
+To begin writing tests either check out [Testcafe's documentation](https://devexpress.github.io/testcafe/documentation/getting-started/#creating-a-test) or take a look at existing tests in `./e2e/tests`.
+
+Lint your code before committing (this will checked by the CI):
+
+```sh
+$ npm run lint
+```
+
+### Standalone
+
+End-to-end tests can be run standalone against an already-running stack (development, staging, or production).
+
+Point the tests at the MetaGenScope stack:
+
+```sh
+$ export TEST_URL=http://staging-server
+```
+
+Execute tests:
+
+```sh
+$ npm run test
+```
+
+### Dockerized
+
+To spin up a MetaGenScope stack and have the end-to-end test-runner service execute the tests make sure you are in the root directory of this repo.
+
+Configure the environment:
+
+```sh
+$ export GITHUB_TOKEN=YourGithubTokenHere
+$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100
+```
+
+Start Docker:
+
+```sh
+$ docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d
+```
+
+Kick off test-runner service:
+
+```sh
+$ sh test.sh
+```
 
 ## Deploying
 

@@ -35,7 +35,12 @@ jobs:
             set -x
             docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d
 
-      # Run tests!
+      - run:
+          name: Lint e2e tests
+          command: |
+            set -x
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml run e2e npm run lint
+
       - run:
           name: Run tests
           command: |

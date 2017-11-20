@@ -37,14 +37,12 @@ services:
       context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
       args:
         - NODE_ENV=development
-        - REACT_APP_METAGENSCOPE_SERVICE_URL=${REACT_APP_METAGENSCOPE_SERVICE_URL}
+        - REACT_APP_METAGENSCOPE_SERVICE_URL=
     ports:
       - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
       metagenscope-service:
         condition: service_started
-    links:
-      - metagenscope-service
 
   nginx:
     container_name: nginx

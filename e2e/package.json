@@ -1,10 +1,41 @@
 {
   "name": "metagenscope-main",
+  "devDependencies": {
+    "babel-eslint": "^8.0.2",
+    "eslint": "^4.11.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.5.1",
+    "randomstring": "^1.1.5",
+    "testcafe": "^0.18.4"
+  },
   "scripts": {
+    "lint": "eslint .",
     "test": "testcafe chrome tests"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "testcafe": "^0.18.4"
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "env": {
+      "node": true
+    },
+    "plugins": [
+      "react",
+      "jsx-a11y",
+      "import"
+    ],
+    "extends": [
+      "airbnb"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 8
+    },
+    "globals": {
+        "fixture": false,
+        "test": false
+    },
+    "rules": {
+      "newline-per-chained-call": 0
+    }
   }
 }
