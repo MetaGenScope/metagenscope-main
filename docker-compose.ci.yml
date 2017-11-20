@@ -1,0 +1,18 @@
+version: '2.1'
+
+services:
+
+  metagenscope-service:
+    command: gunicorn -b 0.0.0.0:5000 manage:app
+
+  e2e:
+    container_name: e2e
+    build:
+      context: ./e2e/
+      args:
+        - TEST_URL=http://test.metagenscope.com
+    depends_on:
+      nginx:
+        condition: service_started
+    links:
+      - "nginx:test.metagenscope.com"

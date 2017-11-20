@@ -3,9 +3,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:9.2.0-browsers
+      - image: circleci/node:9.2.0
     environment:
-      REACT_APP_METAGENSCOPE_SERVICE_URL: metagenscope-service
+      REACT_APP_METAGENSCOPE_SERVICE_URL: http://metagenscope-service
       DISPLAY: ':99.0'
 
     working_directory: ~/repo
@@ -27,31 +27,21 @@ jobs:
             chmod +x docker-compose
             sudo mv docker-compose /usr/local/bin
 
-      - run:
-          name: Install Docker Machine
-          command: |
-            set -x
-            VER="0.13.0"
-            curl -L https://github.com/docker/machine/releases/download/${VER}/docker-machine-`uname -s`-`uname -m` > docker-machine
-            chmod +x docker-machine
-            sudo mv docker-machine /usr/local/bin
-
       - setup_remote_docker
 
       - run:
-          name: Build containers
+          name: Build and start containers
           command: |
             set -x
-            docker-compose -f docker-compose-ci.yml build
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d
 
       # Run tests!
       - run:
           name: Run tests
           command: |
             set -x
-            export TEST_URL=http://nginx
-            docker-compose -f docker-compose-ci.yml run e2e sh test.sh
+            sh test.sh
 
       - run:
           name: Stop container
-          command: docker-compose -f docker-compose-ci.yml down
+          command: docker-compose down

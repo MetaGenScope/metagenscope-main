@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - CircleCI configuration.
 
+### Changed
+- Updated readme.
+
 ## 0.0.1 - 2017-11-13
 ### Added
 - Basic Docker Compose structure.

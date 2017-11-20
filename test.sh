@@ -8,10 +8,10 @@ inspect() {
   fi
 }
 
-docker-compose run metagenscope-service python manage.py test
+docker-compose -f docker-compose.yml -f docker-compose.ci.yml run metagenscope-service python manage.py test
 inspect $? metagenscope-service
 
-npm run test
+docker-compose -f docker-compose.yml -f docker-compose.ci.yml run e2e npm test
 inspect $? e2e
 
 if [ -n "${fails}" ];

@@ -1,7 +1,7 @@
 {
   "name": "metagenscope-main",
   "scripts": {
-    "test": "testcafe chrome e2e"
+    "test": "testcafe chrome tests"
   },
   "dependencies": {},
   "devDependencies": {

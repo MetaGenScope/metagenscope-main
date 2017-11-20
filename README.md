@@ -2,32 +2,84 @@
 
 > MetaGenScope microservice stack.
 
+MetaGenScope runs as a collection of microservices using Docker. This makes it very easy to ensure a consistent environment across development and deployment machines.
+
+1. [Getting Started](#getting-started)
+    1. [Prerequisites](#prerequisites)
+    1. [What's Included](#whats-included)
+1. [Running Locally](#running-locally)
+1. [Deploying](#deploying)
+1. [Meta](#contributing)
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Prerequisites
 
-MetaGenScope runs as a collection of Docker microservices. This makes it very easy to ensure a consistent environment across development and deployment machines. You will need to have [Docker installed](https://docs.docker.com/engine/installation/) on your system to continue.
+**Docker**
 
-### Installing and Running
+You will need to have [Docker installed](https://docs.docker.com/engine/installation/) on your system to continue.
+
+You should create a `dev` Docker machine to work on:
+
+```sh
+$ docker-machine create -d virtualbox dev
+$ eval "$(docker-machine env dev)"
+```
+
+Make note of the IP address of the machine (usually `192.168.99.100`):
+
+```sh
+$ docker-machine ip dev
+```
+
+**Github Token**
+
+You will need to get a [Github token](https://github.com/settings/tokens) to be allow Docker Compose to access the MetaGenScope image definitions.
+
+### What's Included
+
+**Compose files**
+
++ `docker-compose.yml` - The base Compose file
++ `docker-compose.swagger.yml` - Adds swagger-ui service for API documentation.
++ `docker-compose.ci.yml` - Adds end-to-end test runner service.
++ `docker-compose.prod.yml` - Tweaks base settings to be production-ready.
+
+**Nginx Image**
+
+`./nginx` contains a custom Nginx Docker image with MetaGenScope `nginx.conf` site configuration.
+
+**End-to-End Tests**
+
+`./e2e` contains end-to-end tests written with [Testcafe](https://github.com/DevExpress/testcafe) as well as service definition for running from within Docker Compose swarm.
+
+**CircleCI**
+
+`./.circleci` contains CircleCI end-to-end test configuration.
+
+## Running Locally
 
 The first thing you will need to do is build the Docker image locally. This will take a few minutes on first run but will be much faster after components are cached.
+
+Configure the environment:
+
+```sh
+$ export GITHUB_TOKEN=YourGithubTokenHere
+$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100
+```
+
+Build the images:
 
 ```sh
 $ docker-compose build
 ```
 
-Start the container as a daemon:
+Start the containers:
 
 ```sh
 $ docker-compose up -d
-```
-
-Grab the IP address of the machine (usually `192.168.99.100`):
-
-```sh
-$ docker-machine ip dev
 ```
 
 And finally, connect to the machine at `https://192.168.99.100:5001/ping`.
@@ -44,17 +96,26 @@ $ eval $(docker-machine env production)
 Set production environment variables:
 
 ```sh
-$ cp production-variables.env.dist .env
-$ vi .env
+$ export GITHUB_TOKEN=YourGithubTokenHere
+$ export SECRET_KEY=AVerySecretKeyIndeed
+$ export POSTGRES_USER=postgres
+$ export POSTGRES_PASSWORD=postgres
+$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope.com
 ```
 
-Spin up the containers, create the database, seed, and run the tests to make sure it's all working:
+Spin up the containers:
 
 ```sh
-$ docker-compose -f docker-compose-prod.yml up -d
-$ docker-compose -f docker-compose-prod.yml run metagenscope-service python manage.py recreate_db
-$ docker-compose -f docker-compose-prod.yml run metagenscope-service python manage.py seed_db
-$ docker-compose -f docker-compose-prod.yml run metagenscope-service python manage.py test
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+```
+
+Create and seed the database the first time it is deployed:
+
+```sh
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml run \
+  metagenscope-service python manage.py recreate_db
+$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml run \
+  metagenscope-service python manage.py seed_db
 ```
 
 ## Contributing

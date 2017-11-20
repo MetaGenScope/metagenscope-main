@@ -1,0 +1,15 @@
+version: '2.1'
+
+services:
+
+  swagger:
+    container_name: swagger
+    build:
+      context: https://github.com/bchrobot/metagenscope-swagger.git
+    ports:
+      - '8080:8080' # expose ports - HOST:CONTAINER
+    environment:
+      - API_URL=https://raw.githubusercontent.com/bchrobot/metagenscope-swagger/master/swagger.yml
+    depends_on:
+      metagenscope-service:
+        condition: service_started
