@@ -4,6 +4,14 @@ services:
 
   metagenscope-service:
     command: gunicorn -b 0.0.0.0:5000 manage:app
+    environment:
+      - APP_SETTINGS=production
+
+  web-service:
+    build:
+      args:
+        - NODE_ENV=production
+        - REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope-service:5000
 
   e2e:
     container_name: e2e
