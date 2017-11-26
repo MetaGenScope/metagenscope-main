@@ -48,5 +48,17 @@ jobs:
             sh test.sh
 
       - run:
+          name: Copy artifacts
+          when: always
+          command: |
+            docker cp e2e:/usr/src/app/test-artifacts ./test-artifacts
+            ls ./test-artifacts
+
+      - store_artifacts:
+          path: ./test-artifacts
+          destination: test-reports
+
+      - run:
           name: Stop container
+          when: always
           command: docker-compose down

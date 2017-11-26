@@ -25,5 +25,9 @@ RUN curl -sL https://deb.nodesource.com/setup_9.x | bash - \
 WORKDIR /usr/src/app
 ADD . /usr/src/app
 
+RUN mkdir /usr/src/app/test-artifacts
+RUN mkdir /usr/src/app/test-artifacts/screenshots
+RUN chmod -R 777 /usr/src/app/test-artifacts
+
 # Install Testcafe
 RUN npm install --silent

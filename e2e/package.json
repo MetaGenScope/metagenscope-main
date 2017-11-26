@@ -12,7 +12,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "testcafe chrome tests"
+    "test": "testcafe -r xunit,json:./test-artifacts/report.json --screenshots ./test-artifacts/screenshots --screenshots-on-fails chrome ./tests"
   },
   "eslintConfig": {
     "parser": "babel-eslint",
