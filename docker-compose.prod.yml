@@ -3,12 +3,16 @@ version: '2.1'
 services:
 
   metagenscope-db:
+    build: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/db
     environment:
       # Pull these from .env
       - POSTGRES_USER
       - POSTGRES_PASSWORD
 
   metagenscope-service:
+    build:
+      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git
+      dockerfile: Dockerfile
     command: gunicorn -b 0.0.0.0:5000 manage:app
     ports:
       - '5000'
@@ -18,3 +22,10 @@ services:
       - SECRET_KEY
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
       - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
+
+  web-service:
+    build:
+      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production

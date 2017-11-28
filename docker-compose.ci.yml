@@ -2,13 +2,21 @@ version: '2.1'
 
 services:
 
+  metagenscope-db:
+    build: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/db
+
   metagenscope-service:
+    build:
+      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git
+      dockerfile: Dockerfile
     command: gunicorn -b 0.0.0.0:5000 manage:app
     environment:
       - APP_SETTINGS=production
 
   web-service:
     build:
+      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
+      dockerfile: Dockerfile
       args:
         - NODE_ENV=production
         - REACT_APP_METAGENSCOPE_SERVICE_URL=http://test.metagenscope.com

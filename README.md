@@ -65,13 +65,22 @@ You will need to get a [Github token](https://github.com/settings/tokens) to be 
 
 ## Running Locally
 
+To develop locally, pull the three project repos into the same directory. This way changes made to the server or client codebase will trigger a rebuild in the respective local docker machine containers.
+
+```
++-- MetaGenScope
+|   +-- metagenscope-main
+|   +-- metagenscope-server
+|   +-- metagenscope-client
+
+```
+
 The first thing you will need to do is build the Docker image locally. This will take a few minutes on first run but will be much faster after components are cached.
 
 Configure the environment:
 
 ```sh
-$ export GITHUB_TOKEN=YourGithubTokenHere
-$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100
+$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100:5001
 ```
 
 Build the images:

@@ -9,7 +9,7 @@ services:
     ports:
       - '8080:8080' # expose ports - HOST:CONTAINER
     environment:
-      - API_URL=https://raw.githubusercontent.com/bchrobot/metagenscope-swagger/master/swagger.yml
+      - API_URL=https://raw.githubusercontent.com/MetaGenScope/metagenscope-swagger/master/swagger.yml
     depends_on:
       metagenscope-service:
         condition: service_started
