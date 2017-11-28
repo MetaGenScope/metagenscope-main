@@ -34,6 +34,7 @@ jobs:
           command: |
             set -x
             docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml exec metagenscope-service python manage.py recreate_db
 
       - run:
           name: Lint e2e tests
@@ -60,4 +61,4 @@ jobs:
       - run:
           name: Stop container
           when: always
-          command: docker-compose down
+          command: docker-compose down --remove-orphans
