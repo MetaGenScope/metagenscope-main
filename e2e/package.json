@@ -1,5 +1,8 @@
 {
   "name": "metagenscope-main",
+  "dependencies": {
+    "randomstring": "^1.1.5"
+  },
   "devDependencies": {
     "babel-eslint": "^8.0.2",
     "eslint": "^4.11.0",
@@ -7,12 +10,12 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.5.1",
-    "randomstring": "^1.1.5",
     "testcafe": "^0.18.4"
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "testcafe -r xunit,json:./test-artifacts/report.json --screenshots ./test-artifacts/screenshots --screenshots-on-fails chrome ./tests"
+    "test-ci": "/opt/testcafe/docker/testcafe-docker.sh -r spec,json:./test-artifacts/report.json -s ./test-artifacts/screenshots -S firefox ./tests",
+    "test": "testcafe -r spec,json:./test-artifacts/report.json -s ./test-artifacts/screenshots -S all ./tests"
   },
   "eslintConfig": {
     "parser": "babel-eslint",

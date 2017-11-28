@@ -39,7 +39,7 @@ jobs:
           name: Lint e2e tests
           command: |
             set -x
-            docker-compose -f docker-compose.yml -f docker-compose.ci.yml run e2e npm run lint
+            docker-compose -f docker-compose.yml -f docker-compose.ci.yml exec e2e npm run lint
 
       - run:
           name: Run tests
@@ -52,7 +52,6 @@ jobs:
           when: always
           command: |
             docker cp e2e:/usr/src/app/test-artifacts ./test-artifacts
-            ls ./test-artifacts
 
       - store_artifacts:
           path: ./test-artifacts

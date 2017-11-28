@@ -11,7 +11,7 @@ services:
     build:
       args:
         - NODE_ENV=production
-        - REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope-service:5000
+        - REACT_APP_METAGENSCOPE_SERVICE_URL=http://test.metagenscope.com
 
   e2e:
     container_name: e2e
@@ -19,6 +19,8 @@ services:
       context: ./e2e/
       args:
         - TEST_URL=http://test.metagenscope.com
+    # Run service indefinitely so we can test and then copy artifacts from the same instance
+    entrypoint: tail -F -n0 /etc/hosts
     depends_on:
       nginx:
         condition: service_started
