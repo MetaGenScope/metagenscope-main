@@ -33,14 +33,14 @@ jobs:
           name: Build and start containers
           command: |
             set -x
-            docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d
-            docker-compose -f docker-compose.yml -f docker-compose.ci.yml exec metagenscope-service python manage.py recreate_db
+            docker-compose -f docker-compose.ci.yml up --build -d
+            docker-compose -f docker-compose.ci.yml exec metagenscope-service python manage.py recreate_db
 
       - run:
           name: Lint e2e tests
           command: |
             set -x
-            docker-compose -f docker-compose.yml -f docker-compose.ci.yml exec e2e npm run lint
+            docker-compose -f docker-compose.ci.yml exec e2e npm run lint
 
       - run:
           name: Run tests
