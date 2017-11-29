@@ -151,7 +151,7 @@ $ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100
 Start Docker:
 
 ```sh
-$ docker-compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d
+$ docker-compose -f docker-compose.ci.yml up --build -d
 ```
 
 Kick off test-runner service:
@@ -182,16 +182,14 @@ $ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope.com
 Spin up the containers:
 
 ```sh
-$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+$ docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 Create and seed the database the first time it is deployed:
 
 ```sh
-$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml run \
-  metagenscope-service python manage.py recreate_db
-$ docker-compose -f docker-compose.yml -f docker-compose.prod.yml run \
-  metagenscope-service python manage.py seed_db
+$ docker-compose -f docker-compose.prod.yml run metagenscope-service python manage.py recreate_db
+$ docker-compose -f docker-compose.prod.yml run metagenscope-service python manage.py seed_db
 ```
 
 ## Meta

@@ -57,8 +57,3 @@ jobs:
       - store_artifacts:
           path: ./test-artifacts
           destination: test-reports
-
-      - run:
-          name: Stop container
-          when: always
-          command: docker-compose down --remove-orphans
