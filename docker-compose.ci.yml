@@ -4,7 +4,7 @@ services:
 
   metagenscope-db:
     container_name: metagenscope-db
-    build: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/db
+    image: metagenscope/metagenscope-db:ci
     ports:
       - 5435:5432  # expose ports - HOST:CONTAINER
     environment:
@@ -16,9 +16,7 @@ services:
 
   metagenscope-service:
     container_name: metagenscope-service
-    build:
-      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git
-      dockerfile: Dockerfile
+    image: metagenscope/metagenscope-service:ci
     command: gunicorn -b 0.0.0.0:5000 manage:app
     ports:
       - 5001:5000 # expose ports - HOST:CONTAINER
@@ -36,12 +34,7 @@ services:
 
   web-service:
     container_name: web-service
-    build:
-      context: https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
-      dockerfile: Dockerfile
-      args:
-        - NODE_ENV=production
-        - REACT_APP_METAGENSCOPE_SERVICE_URL=http://test.metagenscope.com
+    image: metagenscope/metagenscope-client:ci
     ports:
       - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
@@ -50,7 +43,7 @@ services:
 
   nginx:
     container_name: nginx
-    build: ./nginx/
+    image: metagenscope/metagenscope-nginx:ci
     restart: always
     ports:
       - 80:80
