@@ -1,13 +1,14 @@
 version: 2
 
 jobs:
-  build-ci:
+  build_ci:
     docker:
       - image: circleci/node:9.2.0
 
     environment:
       TAG: ci
       DOCKER_ORG: metagenscope
+      REACT_APP_METAGENSCOPE_SERVICE_URL: http://test.metagenscope.com
 
     steps:
       - checkout
@@ -47,7 +48,6 @@ jobs:
           environment:
             CLIENT_SERVICE: metagenscope-client
             NODE_ENV: production
-            REACT_APP_METAGENSCOPE_SERVICE_URL: http://test.metagenscope.com
           command: |
             export CLIENT_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
             docker build $CLIENT_SERVICE_REPO -t $CLIENT_SERVICE:$COMMIT
@@ -64,6 +64,68 @@ jobs:
             docker tag $NGINX_SERVICE:$COMMIT $DOCKER_ORG/$NGINX_SERVICE:$TAG
             docker push $DOCKER_ORG/$NGINX_SERVICE
 
+  build_emptyfish:
+    docker:
+      - image: circleci/node:9.2.0
+
+    environment:
+      TAG: emptyfish
+      DOCKER_ORG: metagenscope
+      REACT_APP_METAGENSCOPE_SERVICE_URL: http://emptyfish.net
+
+    steps:
+      - checkout
+
+      - setup_remote_docker
+
+      - run:
+          name: Set COMMIT env var
+          command: echo 'export COMMIT=${CIRCLE_SHA1::8}' >> $BASH_ENV
+
+      - run:
+          name: Sign in to Docker Hub
+          command: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
+
+      - run:
+          name: Build and push metagenscope-db
+          environment:
+            DB_SERVICE: metagenscope-db
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/db
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
+
+      - run:
+          name: Build and push metagenscope-service
+          environment:
+            MAIN_SERVICE: metagenscope-service
+          command: |
+            export MAIN_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git
+            docker build $MAIN_SERVICE_REPO -t $MAIN_SERVICE:$COMMIT
+            docker tag $MAIN_SERVICE:$COMMIT $DOCKER_ORG/$MAIN_SERVICE:$TAG
+            docker push $DOCKER_ORG/$MAIN_SERVICE
+
+      - run:
+          name: Build and push web service
+          environment:
+            CLIENT_SERVICE: metagenscope-client
+            NODE_ENV: production
+          command: |
+            export CLIENT_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
+            docker build $CLIENT_SERVICE_REPO -t $CLIENT_SERVICE:$COMMIT
+            docker tag $CLIENT_SERVICE:$COMMIT $DOCKER_ORG/$CLIENT_SERVICE:$TAG
+            docker push $DOCKER_ORG/$CLIENT_SERVICE
+
+      - run:
+          name: Build and push Nginx service
+          environment:
+            NGINX_SERVICE: metagenscope-nginx
+          command: |
+            export NGINX_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-main.git#master:nginx
+            docker build $NGINX_SERVICE_REPO -t $NGINX_SERVICE:$COMMIT
+            docker tag $NGINX_SERVICE:$COMMIT $DOCKER_ORG/$NGINX_SERVICE:$TAG
+            docker push $DOCKER_ORG/$NGINX_SERVICE
 
   test:
     docker:
@@ -114,23 +176,26 @@ jobs:
 workflows:
   version: 2
 
-  test:
+  test_and_build:
     jobs:
-      - build-ci
+      - build_ci
       - test:
           requires:
-            - build-ci
+            - build_ci
+      - build_emptyfish:
+          requires:
+            - test
 
-
-  # build-deploy:
+  # Todo: figure out nightly staging deploy
+  # build-production:
   #   jobs:
-  #     - build
-  #     # - deploy-staging:
-  #     #     requires:
-  #     #       -build
-  #     #     filters:
-  #     #       branches:
-  #     #         only: develop
+  #     - build-emptyfish
+  #     - deploy-staging:
+  #         requires:
+  #           -build
+  #         filters:
+  #           branches:
+  #             only: develop
   #     - deploy-prod:
   #         requires:
   #           - build
