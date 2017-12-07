@@ -200,6 +200,9 @@ workflows:
       - build_emptyfish:
           requires:
             - test
+      - deploy_emptyfish:
+            requires:
+              - build_emptyfish
 
   # Nightly staging build script
   deploy:
