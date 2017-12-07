@@ -185,7 +185,6 @@ jobs:
           command: |
             set -x
             echo "$DROPLET_IP ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAhQKnQi1GvXnLdQ8DIZpl3dlAn7fsglKgsa4tGfavsw7B1dhs67pONmzfw0oqqoppHcsljpQLWni2gJOme/W7Y=" > ~/tmp_auth_hosts
-            ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd ~/metagenscope && git fetch --all && git reset --hard origin/master"
             ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd ~/metagenscope && sh deploy.sh"
 
 workflows:
