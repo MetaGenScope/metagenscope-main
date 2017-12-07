@@ -173,18 +173,40 @@ jobs:
           path: ./test-artifacts
           destination: test-reports
 
+  deploy_emptyfish:
+    docker:
+      - image: circleci/node:9.2.0
+
+    working_directory: ~/repo
+
+    steps:
+      - run:
+          name: Deploy to emptyfish.net
+          command: |
+            set -x
+            echo "$DROPLET_IP ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAhQKnQi1GvXnLdQ8DIZpl3dlAn7fsglKgsa4tGfavsw7B1dhs67pONmzfw0oqqoppHcsljpQLWni2gJOme/W7Y=" > ~/tmp_auth_hosts
+            ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd ~/metagenscope && git fetch --all && git reset --hard origin/master"
+            ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd ~/metagenscope && sh deploy.sh"
+
 workflows:
   version: 2
 
-  test_and_build:
+  deploy:
     jobs:
-      - build_ci
-      - test:
-          requires:
-            - build_ci
-      - build_emptyfish:
-          requires:
-            - test
+      # - build_emptyfish
+      - deploy_emptyfish
+            # requires:
+              # - build_emptyfish
+
+  # test_and_build:
+  #   jobs:
+  #     - build_ci
+  #     - test:
+  #         requires:
+  #           - build_ci
+  #     - build_emptyfish:
+  #         requires:
+  #           - test
 
   # Todo: figure out nightly staging deploy
   # build-production:
