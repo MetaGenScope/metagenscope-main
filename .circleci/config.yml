@@ -190,36 +190,28 @@ jobs:
 workflows:
   version: 2
 
-  deploy:
+  # Run end-to-end test suite on each commit
+  build_ci_and_test:
     jobs:
-      # - build_emptyfish
-      - deploy_emptyfish
-            # requires:
-              # - build_emptyfish
+      - build_ci
+      - test:
+          requires:
+            - build_ci
+      - build_emptyfish:
+          requires:
+            - test
 
-  # test_and_build:
-  #   jobs:
-  #     - build_ci
-  #     - test:
-  #         requires:
-  #           - build_ci
-  #     - build_emptyfish:
-  #         requires:
-  #           - test
-
-  # Todo: figure out nightly staging deploy
-  # build-production:
-  #   jobs:
-  #     - build-emptyfish
-  #     - deploy-staging:
-  #         requires:
-  #           -build
-  #         filters:
-  #           branches:
-  #             only: develop
-  #     - deploy-prod:
-  #         requires:
-  #           - build
-  #         filters:
-  #           branches:
-  #             only: master
+  # Nightly staging build script
+  deploy:
+    triggers:
+      - schedule:
+          cron: "0 */6 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build_emptyfish
+      - deploy_emptyfish:
+            requires:
+              - build_emptyfish
