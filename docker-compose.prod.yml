@@ -2,6 +2,22 @@ version: '2.1'
 
 services:
 
+  mongo-db:
+    container_name: mongo-db
+    image: metagenscope/mongo:emptyfish
+    ports:
+      - 27020:27017  # expose ports - HOST:CONTAINER
+    environment:
+      # Pull these from .env
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+      - MONGO_INITDB_DATABASE=metagenscope
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/mongo-healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
   metagenscope-db:
     container_name: metagenscope-db
     image: metagenscope/metagenscope-db:emptyfish
@@ -24,12 +40,17 @@ services:
       # Environment: development | testing | staging | production
       - APP_SETTINGS=production
       - SECRET_KEY
+      - MONGODB_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope
+      - MONGODB_TEST_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope_test
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
       - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
     depends_on:
+      mongo-db:
+        condition: service_healthy
       metagenscope-db:
         condition: service_healthy
     links:
+      - mongo-db
       - metagenscope-db
 
   web-service:

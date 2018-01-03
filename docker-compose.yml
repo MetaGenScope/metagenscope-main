@@ -2,6 +2,22 @@ version: '2.1'
 
 services:
 
+  mongo-db:
+    container_name: mongo-db
+    build: ../metagenscope-server/app/mongodb
+    ports:
+      - 27020:27017
+    environment:
+      # These are not used in production so it is fine to commit them
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+      - MONGO_INITDB_DATABASE=metagenscope
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/mongo-healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
   metagenscope-db:
     container_name: metagenscope-db
     build: ../metagenscope-server/app/db
@@ -27,12 +43,17 @@ services:
       # Environment: development | testing | staging | production
       - APP_SETTINGS=development
       - SECRET_KEY=my_precious
+      - MONGODB_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope
+      - MONGODB_TEST_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope_test
       - DATABASE_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_dev
       - DATABASE_TEST_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_test
     depends_on:
+      mongo-db:
+        condition: service_healthy
       metagenscope-db:
         condition: service_healthy
     links:
+      - mongo-db
       - metagenscope-db
 
   web-service:
