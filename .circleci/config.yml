@@ -28,7 +28,7 @@ jobs:
           environment:
             DB_SERVICE: mongo
           command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/mongodb
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/mongo_db
             docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
             docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
             docker push $DOCKER_ORG/$DB_SERVICE
@@ -38,7 +38,7 @@ jobs:
           environment:
             DB_SERVICE: metagenscope-db
           command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/db
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/postgres_db
             docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
             docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
             docker push $DOCKER_ORG/$DB_SERVICE
@@ -101,7 +101,7 @@ jobs:
           environment:
             DB_SERVICE: mongo
           command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/mongodb
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/mongo_db
             docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
             docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
             docker push $DOCKER_ORG/$DB_SERVICE
@@ -111,7 +111,7 @@ jobs:
           environment:
             DB_SERVICE: metagenscope-db
           command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:app/db
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/postgres_db
             docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
             docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
             docker push $DOCKER_ORG/$DB_SERVICE
