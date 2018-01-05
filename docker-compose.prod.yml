@@ -2,6 +2,39 @@ version: '2.1'
 
 services:
 
+  redis:
+    container_name: redis
+    image: metagenscope/redis:emptyfish
+    ports:
+      - 6380:6379
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: metagenscope/rabbitmq:emptyfish
+    ports:
+      - 5673:5672
+    environment:
+      # Pull these from .env
+      - RABBITMQ_DEFAULT_USER
+      - RABBITMQ_DEFAULT_PASS
+      - RABBITMQ_DEFAULT_VHOST=metagenscope
+
+  metagenscope-worker:
+    container_name: metagenscope-worker
+    image: metagenscope/metagenscope-worker:emptyfish
+    environment:
+      # Pull these from .env
+      - CELERY_BROKER_URL
+      - CELERY_RESULT_BACKEND
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - redis
+      - rabbitmq
+
   mongo-db:
     container_name: mongo-db
     image: metagenscope/mongo:emptyfish
@@ -49,9 +82,15 @@ services:
         condition: service_healthy
       metagenscope-db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     links:
       - mongo-db
       - metagenscope-db
+      - redis
+      - rabbitmq
 
   web-service:
     container_name: web-service

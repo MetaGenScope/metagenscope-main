@@ -2,6 +2,38 @@ version: '2.1'
 
 services:
 
+  redis:
+    container_name: redis
+    image: metagenscope/redis:ci
+    ports:
+      - 6380:6379
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: metagenscope/rabbitmq:ci
+    ports:
+      - 5673:5672
+    environment:
+      # These are not used in production so it is fine to commit them
+      - RABBITMQ_DEFAULT_USER=metagenscope
+      - RABBITMQ_DEFAULT_PASS=metagenscope
+      - RABBITMQ_DEFAULT_VHOST=metagenscope
+
+  metagenscope-worker:
+    container_name: metagenscope-worker
+    image: metagenscope/metagenscope-worker:ci
+    environment:
+      - CELERY_BROKER_URL=amqp://metagenscope:metagenscope@rabbitmq:5672/metagenscope
+      - CELERY_RESULT_BACKEND=redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - redis
+      - rabbitmq
+
   mongo-db:
     container_name: mongo-db
     image: metagenscope/mongo:ci
@@ -49,9 +81,15 @@ services:
         condition: service_healthy
       metagenscope-db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     links:
       - mongo-db
       - metagenscope-db
+      - redis
+      - rabbitmq
 
   web-service:
     container_name: web-service

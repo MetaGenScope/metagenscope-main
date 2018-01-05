@@ -24,6 +24,36 @@ jobs:
           command: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
 
       - run:
+          name: Build and push redis
+          environment:
+            DB_SERVICE: redis
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git#master:redis
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
+
+      - run:
+          name: Build and push rabbitmq
+          environment:
+            DB_SERVICE: rabbitmq
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git#master:rabbitmq
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
+
+      - run:
+          name: Build and push metagenscope-worker
+          environment:
+            DB_SERVICE: metagenscope-worker
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
+
+      - run:
           name: Build and push mongo-db
           environment:
             DB_SERVICE: mongo
@@ -95,6 +125,36 @@ jobs:
       - run:
           name: Sign in to Docker Hub
           command: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
+
+      - run:
+          name: Build and push redis
+          environment:
+            DB_SERVICE: redis
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git#master:redis
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
+
+      - run:
+          name: Build and push rabbitmq
+          environment:
+            DB_SERVICE: rabbitmq
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git#master:rabbitmq
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
+
+      - run:
+          name: Build and push metagenscope-worker
+          environment:
+            DB_SERVICE: metagenscope-worker
+          command: |
+            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git
+            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
+            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
+            docker push $DOCKER_ORG/$DB_SERVICE
 
       - run:
           name: Build and push mongo-db
