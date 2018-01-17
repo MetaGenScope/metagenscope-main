@@ -7,6 +7,8 @@ services:
     build: ../metagenscope-worker/redis
     ports:
       - 6380:6379
+    healthcheck:
+      test: exit 0
 
   rabbitmq:
     container_name: rabbitmq
@@ -18,6 +20,8 @@ services:
       - RABBITMQ_DEFAULT_USER=metagenscope
       - RABBITMQ_DEFAULT_PASS=metagenscope
       - RABBITMQ_DEFAULT_VHOST=metagenscope
+    healthcheck:
+      test: exit 0
 
   metagenscope-worker:
     container_name: metagenscope-worker
@@ -77,8 +81,8 @@ services:
       # Environment: development | testing | staging | production
       - APP_SETTINGS=development
       - SECRET_KEY=my_precious
-      - MONGODB_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope
-      - MONGODB_TEST_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope_test
+      - MONGODB_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope?authSource=admin
+      - MONGODB_TEST_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope_test?authSource=admin
       - DATABASE_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_dev
       - DATABASE_TEST_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_test
     depends_on:
