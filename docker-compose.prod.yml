@@ -122,3 +122,9 @@ services:
     links:
       - metagenscope-service
       - web-service
+
+volumes:
+  certs:
+    driver: local
+  certs-data:
+    driver: local
