@@ -111,7 +111,7 @@ jobs:
     environment:
       TAG: emptyfish
       DOCKER_ORG: metagenscope
-      REACT_APP_METAGENSCOPE_SERVICE_URL: http://emptyfish.net
+      REACT_APP_METAGENSCOPE_SERVICE_URL: https://www.emptyfish.net
 
     steps:
       - checkout
