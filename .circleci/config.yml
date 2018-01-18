@@ -99,8 +99,8 @@ jobs:
           environment:
             NGINX_SERVICE: metagenscope-nginx
           command: |
-            export NGINX_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-main.git#master:nginx/Dockerfile-local
-            docker build $NGINX_SERVICE_REPO -t $NGINX_SERVICE:$COMMIT
+            export NGINX_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-main.git#master:nginx
+            docker build $NGINX_SERVICE_REPO -t $NGINX_SERVICE:$COMMIT -f Dockerfile-local
             docker tag $NGINX_SERVICE:$COMMIT $DOCKER_ORG/$NGINX_SERVICE:$TAG
             docker push $DOCKER_ORG/$NGINX_SERVICE
 
