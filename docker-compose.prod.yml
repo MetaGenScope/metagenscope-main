@@ -111,6 +111,9 @@ services:
     restart: always
     ports:
       - 80:80
+    volumes:
+      - certs:/etc/letsencrypt
+      - certs-data:/data/letsencrypt
     depends_on:
       metagenscope-service:
         condition: service_started
