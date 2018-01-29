@@ -157,36 +157,6 @@ jobs:
             docker push $DOCKER_ORG/$DB_SERVICE
 
       - run:
-          name: Build and push mongo-db
-          environment:
-            DB_SERVICE: mongo
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/mongo_db
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push metagenscope-db
-          environment:
-            DB_SERVICE: metagenscope-db
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/postgres_db
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push metagenscope-service
-          environment:
-            MAIN_SERVICE: metagenscope-service
-          command: |
-            export MAIN_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git
-            docker build $MAIN_SERVICE_REPO -t $MAIN_SERVICE:$COMMIT
-            docker tag $MAIN_SERVICE:$COMMIT $DOCKER_ORG/$MAIN_SERVICE:$TAG
-            docker push $DOCKER_ORG/$MAIN_SERVICE
-
-      - run:
           name: Build and push web service
           environment:
             CLIENT_SERVICE: metagenscope-client
@@ -264,7 +234,7 @@ jobs:
           name: Deploy to emptyfish.net
           command: |
             set -x
-            echo "$DROPLET_IP ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAhQKnQi1GvXnLdQ8DIZpl3dlAn7fsglKgsa4tGfavsw7B1dhs67pONmzfw0oqqoppHcsljpQLWni2gJOme/W7Y=" > ~/tmp_auth_hosts
+            echo "$DROPLET_IP $DROPLET_HOST_KEY" > ~/tmp_auth_hosts
             ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd ~/metagenscope && git pull && sh deploy.sh"
 
 workflows:
@@ -274,15 +244,19 @@ workflows:
   build_ci_and_test:
     jobs:
       - build_ci
+          context: org-global
       - test:
+          context: org-global
           requires:
             - build_ci
       - build_emptyfish:
+          context: org-global
           requires:
             - test
       - deploy_emptyfish:
-            requires:
-              - build_emptyfish
+          context: org-global
+          requires:
+            - build_emptyfish
 
   # Nightly staging build script
   deploy:
@@ -295,6 +269,8 @@ workflows:
                 - master
     jobs:
       - build_emptyfish
+          context: org-global
       - deploy_emptyfish:
-            requires:
-              - build_emptyfish
+          context: org-global
+          requires:
+            - build_emptyfish
