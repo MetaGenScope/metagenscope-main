@@ -53,7 +53,7 @@ You will need to get a [Github token](https://github.com/settings/tokens) to be 
 
 **Nginx Image**
 
-`./nginx` contains a custom Nginx Docker image with MetaGenScope `nginx.conf` site configuration.
+`./nginx` contains two custom Nginx Docker images each with MetaGenScope `nginx.conf` site configurations. `Dockerfile-local` serves assets over `http://`. `Dockerfile` serves assets over `https://` and is configured for use with the staging site, `emptyfish.net`.
 
 **End-to-End Tests**
 
@@ -72,7 +72,7 @@ To develop locally, pull the three project repos into the same directory. This w
 |   +-- metagenscope-main
 |   +-- metagenscope-server
 |   +-- metagenscope-client
-
+|   +-- metagenscope-worker
 ```
 
 The first thing you will need to do is build the Docker image locally. This will take a few minutes on first run but will be much faster after components are cached.
@@ -134,6 +134,8 @@ $ export TEST_URL=http://staging-server
 Execute tests:
 
 ```sh
+$ cd e2e
+$ npm install
 $ npm run test
 ```
 
@@ -162,21 +164,16 @@ $ sh test.sh
 
 ## Deploying
 
-Switch to production Docker machine ([create it](https://docs.docker.com/machine/examples/ocean/) first, if you haven't):
+First, connect to the production machine and clone this repository.
 
-```sh
-$ docker-machine env production
-$ eval $(docker-machine env production)
+Next, set production environment variables in a `.env` file:
+
 ```
-
-Set production environment variables:
-
-```sh
-$ export GITHUB_TOKEN=YourGithubTokenHere
-$ export SECRET_KEY=AVerySecretKeyIndeed
-$ export POSTGRES_USER=postgres
-$ export POSTGRES_PASSWORD=postgres
-$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope.com
+GITHUB_TOKEN=YourGithubTokenHere
+SECRET_KEY=AVerySecretKeyIndeed
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope.com
 ```
 
 Spin up the containers:
