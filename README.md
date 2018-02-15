@@ -97,6 +97,10 @@ $ docker-compose up -d
 
 And finally, connect to the machine at `https://192.168.99.100/`.
 
+## Development
+
+MetaGenScope uses the GitFlow branching strategy along with Pull Requests for code reviews. Check out [this post](https://devblog.dwarvesf.com/post/git-best-practices/) by the Dwarves Foundation for more information.
+
 ## Testing
 
 End-to-end tests live in `./e2e`:
