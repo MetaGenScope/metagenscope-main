@@ -41,7 +41,7 @@ services:
 
   mongo-db:
     container_name: mongo-db
-    image: metagenscope/mongo:emptyfish
+    image: metagenscope/mongo:staging
     ports:
       - 27020:27017  # expose ports - HOST:CONTAINER
     environment:
@@ -57,7 +57,7 @@ services:
 
   metagenscope-db:
     container_name: metagenscope-db
-    image: metagenscope/metagenscope-db:emptyfish
+    image: metagenscope/metagenscope-db:staging
     ports:
       - 5435:5432  # expose ports - HOST:CONTAINER
     environment:
@@ -69,7 +69,7 @@ services:
 
   metagenscope-service:
     container_name: metagenscope-service
-    image: metagenscope/metagenscope-service:emptyfish
+    image: metagenscope/metagenscope-service:staging
     command: gunicorn -b 0.0.0.0:5000 manage:app
     ports:
       - '5000'
