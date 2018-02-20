@@ -70,9 +70,7 @@ services:
 
   metagenscope-service:
     container_name: metagenscope-service
-    build:
-      context: ../metagenscope-server
-      dockerfile: Dockerfile-local
+    build: ../metagenscope-server
     volumes:
       - '../metagenscope-server:/usr/src/app'
     ports:
