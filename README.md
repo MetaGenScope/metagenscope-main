@@ -95,7 +95,7 @@ Start the containers:
 $ docker-compose up -d
 ```
 
-And finally, connect to the machine at `https://192.168.99.100/`.
+And finally, connect to the machine at `http://192.168.99.100/`.
 
 ## Development
 
