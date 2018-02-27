@@ -110,6 +110,7 @@ services:
     volumes:
       - '../metagenscope-client:/usr/src/app'
       - '/usr/src/app/node_modules'
+      - '/usr/src/app/typings'
     ports:
       - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
