@@ -4,7 +4,7 @@ services:
 
   redis:
     container_name: redis
-    image: metagenscope/redis:emptyfish
+    image: metagenscope/redis:staging
     ports:
       - 6380:6379
     healthcheck:
@@ -12,7 +12,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    image: metagenscope/rabbitmq:emptyfish
+    image: metagenscope/rabbitmq:staging
     ports:
       - 5673:5672
     environment:
@@ -25,7 +25,7 @@ services:
 
   metagenscope-worker:
     container_name: metagenscope-worker
-    image: metagenscope/metagenscope-worker:emptyfish
+    image: metagenscope/metagenscope-worker:staging
     environment:
       # Pull these from .env
       - CELERY_BROKER_URL
@@ -98,7 +98,7 @@ services:
 
   web-service:
     container_name: web-service
-    image: metagenscope/metagenscope-client:emptyfish
+    image: metagenscope/metagenscope-client:staging
     ports:
       - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
@@ -107,7 +107,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: metagenscope/metagenscope-nginx:emptyfish
+    image: metagenscope/metagenscope-nginx:staging
     restart: always
     ports:
       - 80:80
