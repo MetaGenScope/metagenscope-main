@@ -7,9 +7,8 @@ jobs:
       - image: circleci/node:9.2.0
 
     environment:
-      TAG: emptyfish
+      TAG: staging
       DOCKER_ORG: metagenscope
-      REACT_APP_METAGENSCOPE_SERVICE_URL: https://www.emptyfish.net
 
     steps:
       - checkout
@@ -23,17 +22,6 @@ jobs:
       - run:
           name: Sign in to Docker Hub
           command: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
-
-      - run:
-          name: Build and push web service
-          environment:
-            CLIENT_SERVICE: metagenscope-client
-            NODE_ENV: production
-          command: |
-            export CLIENT_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
-            docker build $CLIENT_SERVICE_REPO -t $CLIENT_SERVICE:$COMMIT
-            docker tag $CLIENT_SERVICE:$COMMIT $DOCKER_ORG/$CLIENT_SERVICE:$TAG
-            docker push $DOCKER_ORG/$CLIENT_SERVICE
 
       - run:
           name: Build and push Nginx service

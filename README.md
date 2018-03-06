@@ -48,16 +48,11 @@ You will need to get a [Github token](https://github.com/settings/tokens) to be 
 
 + `docker-compose.yml` - The base Compose file
 + `docker-compose.swagger.yml` - Adds swagger-ui service for API documentation.
-+ `docker-compose.ci.yml` - Adds end-to-end test runner service.
 + `docker-compose.prod.yml` - Tweaks base settings to be production-ready.
 
 **Nginx Image**
 
 `./nginx` contains two custom Nginx Docker images each with MetaGenScope `nginx.conf` site configurations. `Dockerfile-local` serves assets over `http://`. `Dockerfile` serves assets over `https://` and is configured for use with the staging site, `emptyfish.net`.
-
-**End-to-End Tests**
-
-`./e2e` contains end-to-end tests written with [Testcafe](https://github.com/DevExpress/testcafe) as well as service definition for running from within Docker Compose swarm.
 
 **CircleCI**
 
@@ -103,68 +98,7 @@ MetaGenScope uses the GitFlow branching strategy along with Pull Requests for co
 
 ## Testing
 
-End-to-end tests live in `./e2e`:
-
-```sh
-$ cd e2e
-```
-
-To develop or run tests you will need to instal the node dependencies:
-
-```sh
-$ npm install
-```
-
-### Writing Tests
-
-To begin writing tests either check out [Testcafe's documentation](https://devexpress.github.io/testcafe/documentation/getting-started/#creating-a-test) or take a look at existing tests in `./e2e/tests`.
-
-Lint your code before committing (this will checked by the CI):
-
-```sh
-$ npm run lint
-```
-
-### Standalone
-
-End-to-end tests can be run standalone against an already-running stack (development, staging, or production).
-
-Point the tests at the MetaGenScope stack:
-
-```sh
-$ export TEST_URL=http://staging-server
-```
-
-Execute tests:
-
-```sh
-$ cd e2e
-$ npm install
-$ npm run test
-```
-
-### Dockerized
-
-To spin up a MetaGenScope stack and have the end-to-end test-runner service execute the tests make sure you are in the root directory of this repo.
-
-Configure the environment:
-
-```sh
-$ export GITHUB_TOKEN=YourGithubTokenHere
-$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100
-```
-
-Start Docker:
-
-```sh
-$ docker-compose -f docker-compose.ci.yml up --build -d
-```
-
-Kick off test-runner service:
-
-```sh
-$ sh test.sh
-```
+Testing is done per-service in their own repositories. This allows each service to be tested and deployed independent of the main repository.
 
 ## Deploying
 
