@@ -223,7 +223,7 @@ jobs:
           path: ./test-artifacts
           destination: test-reports
 
-  deploy_emptyfish:
+  deploy_staging:
     docker:
       - image: circleci/node:9.2.0
 
@@ -235,7 +235,7 @@ jobs:
           command: |
             set -x
             echo "$DROPLET_IP $DROPLET_HOST_KEY" > ~/tmp_auth_hosts
-            ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd /home/metagenscope/metagenscope-app && git pull && sh deploy.sh"
+            ssh -A -o "UserKnownHostsFile ~/tmp_auth_hosts" $DROPLET_USER@$DROPLET_IP "cd /home/metagenscope/metagenscope-app && git fetch --all && git checkout develop && sh deploy.sh"
 
 workflows:
   version: 2
@@ -253,7 +253,7 @@ workflows:
           context: org-global
           requires:
             - test
-      - deploy_emptyfish:
+      - deploy_staging:
           context: org-global
           requires:
             - build_emptyfish
@@ -270,7 +270,7 @@ workflows:
     jobs:
       - build_emptyfish:
           context: org-global
-      - deploy_emptyfish:
+      - deploy_staging:
           context: org-global
           requires:
             - build_emptyfish
