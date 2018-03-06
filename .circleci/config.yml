@@ -1,110 +1,8 @@
 version: 2
 
 jobs:
-  build_ci:
-    docker:
-      - image: circleci/node:9.2.0
 
-    environment:
-      TAG: ci
-      DOCKER_ORG: metagenscope
-      REACT_APP_METAGENSCOPE_SERVICE_URL: http://test.metagenscope.com
-
-    steps:
-      - checkout
-
-      - setup_remote_docker
-
-      - run:
-          name: Set COMMIT env var
-          command: echo 'export COMMIT=${CIRCLE_SHA1::8}' >> $BASH_ENV
-
-      - run:
-          name: Sign in to Docker Hub
-          command: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
-
-      - run:
-          name: Build and push redis
-          environment:
-            DB_SERVICE: redis
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git#master:redis
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push rabbitmq
-          environment:
-            DB_SERVICE: rabbitmq
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git#master:rabbitmq
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push metagenscope-worker
-          environment:
-            DB_SERVICE: metagenscope-worker
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-worker.git
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push mongo-db
-          environment:
-            DB_SERVICE: mongo
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/mongo_db
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push metagenscope-db
-          environment:
-            DB_SERVICE: metagenscope-db
-          command: |
-            export DB_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git#master:database_docker/postgres_db
-            docker build $DB_SERVICE_REPO -t $DB_SERVICE:$COMMIT
-            docker tag $DB_SERVICE:$COMMIT $DOCKER_ORG/$DB_SERVICE:$TAG
-            docker push $DOCKER_ORG/$DB_SERVICE
-
-      - run:
-          name: Build and push metagenscope-service
-          environment:
-            MAIN_SERVICE: metagenscope-service
-          command: |
-            export MAIN_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-server.git
-            docker build $MAIN_SERVICE_REPO -t $MAIN_SERVICE:$COMMIT
-            docker tag $MAIN_SERVICE:$COMMIT $DOCKER_ORG/$MAIN_SERVICE:$TAG
-            docker push $DOCKER_ORG/$MAIN_SERVICE
-
-      - run:
-          name: Build and push web service
-          environment:
-            CLIENT_SERVICE: metagenscope-client
-            NODE_ENV: production
-          command: |
-            export CLIENT_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-client.git
-            docker build $CLIENT_SERVICE_REPO -t $CLIENT_SERVICE:$COMMIT
-            docker tag $CLIENT_SERVICE:$COMMIT $DOCKER_ORG/$CLIENT_SERVICE:$TAG
-            docker push $DOCKER_ORG/$CLIENT_SERVICE
-
-      - run:
-          name: Build and push Nginx service
-          environment:
-            NGINX_SERVICE: metagenscope-nginx
-          command: |
-            export NGINX_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-main.git#master:nginx
-            docker build $NGINX_SERVICE_REPO -t $NGINX_SERVICE:$COMMIT -f Dockerfile-local
-            docker tag $NGINX_SERVICE:$COMMIT $DOCKER_ORG/$NGINX_SERVICE:$TAG
-            docker push $DOCKER_ORG/$NGINX_SERVICE
-
-  build_emptyfish:
+  build_staging:
     docker:
       - image: circleci/node:9.2.0
 
@@ -177,52 +75,6 @@ jobs:
             docker tag $NGINX_SERVICE:$COMMIT $DOCKER_ORG/$NGINX_SERVICE:$TAG
             docker push $DOCKER_ORG/$NGINX_SERVICE
 
-  test:
-    docker:
-      - image: circleci/node:9.2.0
-    environment:
-      DISPLAY: ':99.0'
-
-    working_directory: ~/repo
-
-    steps:
-      - checkout
-
-      - setup_remote_docker
-
-      - run:
-          name: Sign in to Docker Hub
-          command: docker login -u $DOCKER_ID -p $DOCKER_PASSWORD
-
-      - run:
-          name: Build and start containers
-          command: |
-            set -x
-            docker-compose -f docker-compose.ci.yml up --build -d
-            docker-compose -f docker-compose.ci.yml exec metagenscope-service python manage.py recreate_db
-
-      - run:
-          name: Lint e2e tests
-          command: |
-            set -x
-            docker-compose -f docker-compose.ci.yml exec e2e npm run lint
-
-      - run:
-          name: Run tests
-          command: |
-            set -x
-            sh test.sh
-
-      - run:
-          name: Copy artifacts
-          when: always
-          command: |
-            docker cp e2e:/usr/src/app/test-artifacts ./test-artifacts
-
-      - store_artifacts:
-          path: ./test-artifacts
-          destination: test-reports
-
   deploy_staging:
     docker:
       - image: circleci/node:9.2.0
@@ -243,34 +95,9 @@ workflows:
   # Run end-to-end test suite on each commit
   build_ci_and_test:
     jobs:
-      - build_ci:
-          context: org-global
-      - test:
-          context: org-global
-          requires:
-            - build_ci
-      - build_emptyfish:
-          context: org-global
-          requires:
-            - test
-      - deploy_staging:
-          context: org-global
-          requires:
-            - build_emptyfish
-
-  # Nightly staging build script
-  deploy:
-    triggers:
-      - schedule:
-          cron: "0 */6 * * *"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - build_emptyfish:
+      - build_staging:
           context: org-global
       - deploy_staging:
           context: org-global
           requires:
-            - build_emptyfish
+            - build_staging
