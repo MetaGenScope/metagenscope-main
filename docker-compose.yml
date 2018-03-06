@@ -4,7 +4,7 @@ services:
 
   redis:
     container_name: redis
-    build: ../metagenscope-worker/redis
+    build: ../metagenscope-server/database_docker/redis
     ports:
       - 6380:6379
     healthcheck:
@@ -12,7 +12,7 @@ services:
 
   rabbitmq:
     container_name: rabbitmq
-    build: ../metagenscope-worker/rabbitmq
+    build: ../metagenscope-server/database_docker/rabbitmq
     ports:
       - 5673:5672
     environment:
@@ -25,9 +25,11 @@ services:
 
   metagenscope-worker:
     container_name: metagenscope-worker
-    build: ../metagenscope-worker
+    build:
+      context: ../metagenscope-server
+      dockerfile: Dockerfile-worker
     volumes:
-      - '../metagenscope-worker:/usr/src/app'
+      - '../metagenscope-server:/usr/src/app'
     environment:
       - CELERY_BROKER_URL=amqp://metagenscope:metagenscope@rabbitmq:5672/metagenscope
       - CELERY_RESULT_BACKEND=redis://redis:6379
