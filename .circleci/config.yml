@@ -93,11 +93,17 @@ workflows:
   version: 2
 
   # Run end-to-end test suite on each commit
-  build_ci_and_test:
+  deploy-staging:
     jobs:
       - build_staging:
           context: org-global
+          filters:
+            branches:
+              only: develop
       - deploy_staging:
           context: org-global
+          filters:
+            branches:
+              only: develop
           requires:
             - build_staging
