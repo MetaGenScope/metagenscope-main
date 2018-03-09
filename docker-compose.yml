@@ -31,6 +31,13 @@ services:
     volumes:
       - '../metagenscope-server:/usr/src/app'
     environment:
+      # These should match metagenscope-service
+      - APP_SETTINGS=development
+      - SECRET_KEY=my_precious
+      - MONGODB_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope?authSource=admin
+      - MONGODB_TEST_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope_test?authSource=admin
+      - DATABASE_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_dev
+      - DATABASE_TEST_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_test
       - CELERY_BROKER_URL=amqp://metagenscope:metagenscope@rabbitmq:5672/metagenscope
       - CELERY_RESULT_BACKEND=redis://redis:6379
     depends_on:
@@ -78,6 +85,7 @@ services:
     ports:
       - 5001:5000 # expose ports - HOST:CONTAINER
     environment:
+      # These should match metagenscope-worker
       # Environment: development | testing | staging | production
       - APP_SETTINGS=development
       - SECRET_KEY=my_precious
@@ -85,6 +93,8 @@ services:
       - MONGODB_TEST_HOST=mongodb://mongodb:mongodb@mongo-db:27017/metagenscope_test?authSource=admin
       - DATABASE_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_dev
       - DATABASE_TEST_URL=postgres://postgres:postgres@metagenscope-db:5432/metagenscope_test
+      - CELERY_BROKER_URL=amqp://metagenscope:metagenscope@rabbitmq:5672/metagenscope
+      - CELERY_RESULT_BACKEND=redis://redis:6379
     depends_on:
       mongo-db:
         condition: service_healthy

@@ -27,7 +27,13 @@ services:
     container_name: metagenscope-worker
     image: metagenscope/metagenscope-worker:staging
     environment:
-      # Pull these from .env
+      # These should match metagenscope-service
+      - APP_SETTINGS=production
+      - SECRET_KEY
+      - MONGODB_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope?authSource=admin
+      - MONGODB_TEST_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope_test?authSource=admin
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
+      - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
       - CELERY_BROKER_URL
       - CELERY_RESULT_BACKEND
     depends_on:
@@ -74,6 +80,7 @@ services:
     ports:
       - '5000'
     environment:
+      # These should match metagenscope-worker
       # Environment: development | testing | staging | production
       - APP_SETTINGS=production
       - SECRET_KEY
@@ -81,6 +88,8 @@ services:
       - MONGODB_TEST_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope_test?authSource=admin
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
       - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
+      - CELERY_BROKER_URL
+      - CELERY_RESULT_BACKEND
     depends_on:
       mongo-db:
         condition: service_healthy
