@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3.5'
 
 services:
 
@@ -6,15 +6,18 @@ services:
     container_name: redis
     image: metagenscope/redis:staging
     ports:
-      - 6380:6379
+      # Do not expose externally
+      - 6379
     healthcheck:
       test: exit 0
+    restart: always
 
   rabbitmq:
     container_name: rabbitmq
     image: metagenscope/rabbitmq:staging
     ports:
-      - 5673:5672
+      # Do not expose externally
+      - 5672
     environment:
       # Pull these from .env
       - RABBITMQ_DEFAULT_USER
@@ -22,10 +25,19 @@ services:
       - RABBITMQ_DEFAULT_VHOST=metagenscope
     healthcheck:
       test: exit 0
+    restart: always
 
   metagenscope-worker:
     container_name: metagenscope-worker
     image: metagenscope/metagenscope-worker:staging
+    command: >-
+      ./startup.sh
+      metagenscope-db:5432
+      mongo-db:27017
+      redis:6379
+      rabbitmq:5672
+      --
+      celery worker -A worker.celery --loglevel=info
     environment:
       # These should match metagenscope-service
       - APP_SETTINGS=production
@@ -34,16 +46,19 @@ services:
       - MONGODB_TEST_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope_test?authSource=admin
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
       - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
-      - CELERY_BROKER_URL
-      - CELERY_RESULT_BACKEND
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/metagenscope
+      - CELERY_RESULT_BACKEND=redis://redis:6379
     depends_on:
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    links:
+      - mongo-db
+      - metagenscope-db
       - redis
       - rabbitmq
+    links:
+      - mongo-db
+      - metagenscope-db
+      - redis
+      - rabbitmq
+    restart: always
 
   mongo-db:
     container_name: mongo-db
@@ -60,6 +75,7 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
+    restart: always
 
   metagenscope-db:
     container_name: metagenscope-db
@@ -72,11 +88,19 @@ services:
       - POSTGRES_PASSWORD
     healthcheck:
       test: exit 0
+    restart: always
 
   metagenscope-service:
     container_name: metagenscope-service
     image: metagenscope/metagenscope-service:staging
-    command: gunicorn -b 0.0.0.0:5000 manage:app
+    command: >-
+      ./startup.sh
+      metagenscope-db:5432
+      mongo-db:27017
+      redis:6379
+      rabbitmq:5672
+      --
+      gunicorn -b 0.0.0.0:5000 manage:app
     ports:
       - '5000'
     environment:
@@ -88,22 +112,19 @@ services:
       - MONGODB_TEST_HOST=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo-db:27017/metagenscope_test?authSource=admin
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_prod
       - DATABASE_TEST_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@metagenscope-db:5432/metagenscope_test
-      - CELERY_BROKER_URL
-      - CELERY_RESULT_BACKEND
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/metagenscope
+      - CELERY_RESULT_BACKEND=redis://redis:6379
     depends_on:
-      mongo-db:
-        condition: service_healthy
-      metagenscope-db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - mongo-db
+      - metagenscope-db
+      - redis
+      - rabbitmq
     links:
       - mongo-db
       - metagenscope-db
       - redis
       - rabbitmq
+    restart: always
 
   web-service:
     container_name: web-service
@@ -111,8 +132,8 @@ services:
     ports:
       - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
-      metagenscope-service:
-        condition: service_started
+      - metagenscope-service
+    restart: always
 
   nginx:
     container_name: nginx
@@ -125,13 +146,12 @@ services:
       - certs:/etc/letsencrypt
       - certs-data:/data/letsencrypt
     depends_on:
-      metagenscope-service:
-        condition: service_started
-      web-service:
-        condition: service_started
+      - metagenscope-service
+      - web-service
     links:
       - metagenscope-service
       - web-service
+    restart: always
 
 volumes:
   certs:

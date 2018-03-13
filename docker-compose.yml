@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3.5'
 
 services:
 
@@ -28,6 +28,14 @@ services:
     build:
       context: ../metagenscope-server
       dockerfile: Dockerfile-worker
+    command: >-
+      ./startup.sh
+      metagenscope-db:5432
+      mongo-db:27017
+      redis:6379
+      rabbitmq:5672
+      --
+      celery worker -A worker.celery --loglevel=info
     volumes:
       - '../metagenscope-server:/usr/src/app'
     environment:
@@ -41,11 +49,13 @@ services:
       - CELERY_BROKER_URL=amqp://metagenscope:metagenscope@rabbitmq:5672/metagenscope
       - CELERY_RESULT_BACKEND=redis://redis:6379
     depends_on:
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - mongo-db
+      - metagenscope-db
+      - redis
+      - rabbitmq
     links:
+      - mongo-db
+      - metagenscope-db
       - redis
       - rabbitmq
 
@@ -80,6 +90,14 @@ services:
   metagenscope-service:
     container_name: metagenscope-service
     build: ../metagenscope-server
+    command: >-
+      ./startup.sh
+      metagenscope-db:5432
+      mongo-db:27017
+      redis:6379
+      rabbitmq:5672
+      --
+      python manage.py runserver -h 0.0.0.0
     volumes:
       - '../metagenscope-server:/usr/src/app'
     ports:
@@ -96,14 +114,10 @@ services:
       - CELERY_BROKER_URL=amqp://metagenscope:metagenscope@rabbitmq:5672/metagenscope
       - CELERY_RESULT_BACKEND=redis://redis:6379
     depends_on:
-      mongo-db:
-        condition: service_healthy
-      metagenscope-db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      - mongo-db
+      - metagenscope-db
+      - redis
+      - rabbitmq
     links:
       - mongo-db
       - metagenscope-db
@@ -126,8 +140,7 @@ services:
     ports:
       - '9000:9000' # expose ports - HOST:CONTAINER
     depends_on:
-      metagenscope-service:
-        condition: service_started
+      - metagenscope-service
 
   nginx:
     container_name: nginx
@@ -138,10 +151,8 @@ services:
     ports:
       - 80:80
     depends_on:
-      metagenscope-service:
-        condition: service_started
-      web-service:
-        condition: service_started
+      - metagenscope-service
+      - web-service
     links:
       - metagenscope-service
       - web-service
