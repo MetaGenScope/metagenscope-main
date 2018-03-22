@@ -6,17 +6,17 @@ services:
     container_name: redis
     image: metagenscope/redis:staging
     ports:
-      # Do not expose externally
       - 6379
     healthcheck:
       test: exit 0
+    networks:
+      - private
     restart: always
 
   rabbitmq:
     container_name: rabbitmq
     image: metagenscope/rabbitmq:staging
     ports:
-      # Do not expose externally
       - 5672
     environment:
       # Pull these from .env
@@ -25,13 +25,15 @@ services:
       - RABBITMQ_DEFAULT_VHOST=metagenscope
     healthcheck:
       test: exit 0
+    networks:
+      - private
     restart: always
 
   mongo-db:
     container_name: mongo-db
     image: metagenscope/mongo:staging
     ports:
-      - 27020:27017  # expose ports - HOST:CONTAINER
+      - 27017
     volumes:
       - type: volume
         source: mongo-data
@@ -46,13 +48,15 @@ services:
       interval: 1m
       timeout: 10s
       retries: 3
+    networks:
+      - private
     restart: always
 
   metagenscope-db:
     container_name: metagenscope-db
     image: metagenscope/metagenscope-db:staging
     ports:
-      - 5435:5432  # expose ports - HOST:CONTAINER
+      - 5432
     volumes:
       - type: volume
         source: postgresql-data
@@ -63,11 +67,14 @@ services:
       - POSTGRES_PASSWORD
     healthcheck:
       test: exit 0
+    networks:
+      - private
     restart: always
 
   metagenscope-worker:
     container_name: metagenscope-worker
     image: metagenscope/metagenscope-worker:staging
+    # No port exposure because worker communicates entirely via RabbitMQ
     command: >-
       ./startup.sh
       metagenscope-db:5432
@@ -91,11 +98,9 @@ services:
       - metagenscope-db
       - redis
       - rabbitmq
-    links:
-      - mongo-db
-      - metagenscope-db
-      - redis
-      - rabbitmq
+    networks:
+      - public
+      - private
     restart: always
 
   metagenscope-service:
@@ -110,7 +115,7 @@ services:
       --
       gunicorn -b 0.0.0.0:5000 manage:app
     ports:
-      - '5000'
+      - 5000
     environment:
       # These should match metagenscope-worker
       # Environment: development | testing | staging | production
@@ -127,27 +132,28 @@ services:
       - metagenscope-db
       - redis
       - rabbitmq
-    links:
-      - mongo-db
-      - metagenscope-db
-      - redis
-      - rabbitmq
+    networks:
+      - public
+      - private
     restart: always
 
   web-service:
     container_name: web-service
     image: metagenscope/metagenscope-client:staging
     ports:
-      - '9000:9000' # expose ports - HOST:CONTAINER
+      - 9000
     depends_on:
       - metagenscope-service
     restart: always
+    networks:
+      - public
 
   nginx:
     container_name: nginx
     image: metagenscope/metagenscope-nginx:staging
     restart: always
     ports:
+      # Nginx reverse proxy is the only public port exposure
       - 80:80
       - 443:443
     volumes:
@@ -156,9 +162,8 @@ services:
     depends_on:
       - metagenscope-service
       - web-service
-    links:
-      - metagenscope-service
-      - web-service
+    networks:
+      - public
     restart: always
 
 volumes:
@@ -168,3 +173,7 @@ volumes:
     driver: local
   certs-data:
     driver: local
+
+networks:
+  public:
+  private:
