@@ -23,6 +23,34 @@ services:
     healthcheck:
       test: exit 0
 
+  mongo-db:
+    container_name: mongo-db
+    build: ../metagenscope-server/database_docker/mongo_db
+    ports:
+      - 27020:27017
+    environment:
+      # These are not used in production so it is fine to commit them
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+      - MONGO_INITDB_DATABASE=metagenscope
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/mongo-healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+  metagenscope-db:
+    container_name: metagenscope-db
+    build: ../metagenscope-server/database_docker/postgres_db
+    ports:
+      - 5435:5432  # expose ports - HOST:CONTAINER
+    environment:
+      # These are not used in production so it is fine to commit them
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: exit 0
+
   metagenscope-worker:
     container_name: metagenscope-worker
     build:
@@ -58,34 +86,6 @@ services:
       - metagenscope-db
       - redis
       - rabbitmq
-
-  mongo-db:
-    container_name: mongo-db
-    build: ../metagenscope-server/database_docker/mongo_db
-    ports:
-      - 27020:27017
-    environment:
-      # These are not used in production so it is fine to commit them
-      - MONGO_INITDB_ROOT_USERNAME=mongodb
-      - MONGO_INITDB_ROOT_PASSWORD=mongodb
-      - MONGO_INITDB_DATABASE=metagenscope
-    healthcheck:
-      test: ["CMD", "bash", "/usr/local/bin/mongo-healthcheck"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-
-  metagenscope-db:
-    container_name: metagenscope-db
-    build: ../metagenscope-server/database_docker/postgres_db
-    ports:
-      - 5435:5432  # expose ports - HOST:CONTAINER
-    environment:
-      # These are not used in production so it is fine to commit them
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    healthcheck:
-      test: exit 0
 
   metagenscope-service:
     container_name: metagenscope-service

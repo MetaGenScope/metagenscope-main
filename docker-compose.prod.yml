@@ -27,6 +27,44 @@ services:
       test: exit 0
     restart: always
 
+  mongo-db:
+    container_name: mongo-db
+    image: metagenscope/mongo:staging
+    ports:
+      - 27020:27017  # expose ports - HOST:CONTAINER
+    volumes:
+      - type: volume
+        source: mongo-data
+        target: /data/db
+    environment:
+      # Pull these from .env
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+      - MONGO_INITDB_DATABASE=metagenscope
+    healthcheck:
+      test: ["CMD", "bash", "/usr/local/bin/mongo-healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    restart: always
+
+  metagenscope-db:
+    container_name: metagenscope-db
+    image: metagenscope/metagenscope-db:staging
+    ports:
+      - 5435:5432  # expose ports - HOST:CONTAINER
+    volumes:
+      - type: volume
+        source: postgresql-data
+        target: /var/lib/postgresql/data
+    environment:
+      # Pull these from .env
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+    healthcheck:
+      test: exit 0
+    restart: always
+
   metagenscope-worker:
     container_name: metagenscope-worker
     image: metagenscope/metagenscope-worker:staging
@@ -58,36 +96,6 @@ services:
       - metagenscope-db
       - redis
       - rabbitmq
-    restart: always
-
-  mongo-db:
-    container_name: mongo-db
-    image: metagenscope/mongo:staging
-    ports:
-      - 27020:27017  # expose ports - HOST:CONTAINER
-    environment:
-      # Pull these from .env
-      - MONGO_INITDB_ROOT_USERNAME
-      - MONGO_INITDB_ROOT_PASSWORD
-      - MONGO_INITDB_DATABASE=metagenscope
-    healthcheck:
-      test: ["CMD", "bash", "/usr/local/bin/mongo-healthcheck"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-    restart: always
-
-  metagenscope-db:
-    container_name: metagenscope-db
-    image: metagenscope/metagenscope-db:staging
-    ports:
-      - 5435:5432  # expose ports - HOST:CONTAINER
-    environment:
-      # Pull these from .env
-      - POSTGRES_USER
-      - POSTGRES_PASSWORD
-    healthcheck:
-      test: exit 0
     restart: always
 
   metagenscope-service:
@@ -154,6 +162,8 @@ services:
     restart: always
 
 volumes:
+  mongo-data:
+  postgresql-data:
   certs:
     driver: local
   certs-data:
