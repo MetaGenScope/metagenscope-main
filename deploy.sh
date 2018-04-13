@@ -9,3 +9,6 @@ docker-compose -f docker-compose.prod.yml run --rm metagenscope-service python m
 docker-compose -f docker-compose.prod.yml down;
 
 docker-compose -f docker-compose.prod.yml up --no-deps -d --force-recreate;
+
+# Clean up unused images
+docker image prune --all --force
