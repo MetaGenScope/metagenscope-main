@@ -127,12 +127,9 @@ First, connect to the production machine and clone _just this repository_ (you d
 
 Next, set production environment variables in a `.env` file:
 
-```
-SECRET_KEY=AVerySecretKeyIndeed
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
-MONGO_INITDB_ROOT_USERNAME=metagenscope
-MONGO_INITDB_ROOT_PASSWORD=metagenscope
+```sh
+$ cp production-variables.env.dist .env
+$ vi .env
 ```
 
 Spin up the containers:
