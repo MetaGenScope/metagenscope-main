@@ -7,7 +7,7 @@ services:
     build:
       context: https://github.com/bchrobot/metagenscope-swagger.git
     ports:
-      - '8080:8080' # expose ports - HOST:CONTAINER
+      - '8081:8080' # expose ports - HOST:CONTAINER
     environment:
       - API_URL=https://raw.githubusercontent.com/MetaGenScope/metagenscope-swagger/master/swagger.yml
     depends_on:

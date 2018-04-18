@@ -8,6 +8,7 @@ MetaGenScope runs as a collection of microservices using Docker. This makes it v
     1. [Prerequisites](#prerequisites)
     1. [What's Included](#whats-included)
 1. [Running Locally](#running-locally)
+    1. [Docker Machine](#docker-machine)
 1. [Testing](#testing)
     1. [Writing Tests](#writing-tests)
     1. [Standalone](#standalone)
@@ -23,24 +24,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 **Docker**
 
-You will need to have [Docker installed](https://docs.docker.com/engine/installation/) on your system to continue.
+You will need to have the Docker suite installed:
 
-You should create a `dev` Docker machine to work on:
-
-```sh
-$ docker-machine create -d virtualbox dev
-$ eval "$(docker-machine env dev)"
-```
-
-Make note of the IP address of the machine (usually `192.168.99.100`):
-
-```sh
-$ docker-machine ip dev
-```
-
-**Github Token**
-
-You will need to get a [Github token](https://github.com/settings/tokens) to be allow Docker Compose to access the MetaGenScope image definitions.
+- [Docker](https://docs.docker.com/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker Machine](https://docs.docker.com/machine/install-machine/) (optional)
 
 ### What's Included
 
@@ -52,11 +40,11 @@ You will need to get a [Github token](https://github.com/settings/tokens) to be 
 
 **Nginx Image**
 
-`./nginx` contains two custom Nginx Docker images each with MetaGenScope `nginx.conf` site configurations. `Dockerfile-local` serves assets over `http://`. `Dockerfile` serves assets over `https://` and is configured for use with the staging site, `emptyfish.net`.
+`./nginx` contains a custom Nginx Docker image with a MetaGenScope `nginx.conf` site configuration. This serves the application stack over `http://` on port 8080 -- the expectation being that a TLS endpoint (ex. Nginx reverse proxy) will sit in front of MetaGenScope.
 
 **CircleCI**
 
-`./.circleci` contains CircleCI end-to-end test configuration.
+`./.circleci` contains CircleCI configuration to continuously deploy to the staging server, www.emptyfish.net.
 
 ## Running Locally
 
@@ -67,15 +55,14 @@ To develop locally, pull the three project repos into the same directory. This w
 |   +-- metagenscope-main
 |   +-- metagenscope-server
 |   +-- metagenscope-client
-|   +-- metagenscope-worker
 ```
 
-The first thing you will need to do is build the Docker image locally. This will take a few minutes on first run but will be much faster after components are cached.
+The first thing you will need to do is build the Docker image locally. This will take a few minutes on first run but will be much faster after component image layers are cached.
 
-Configure the environment:
+Optional: explicitly set back-end service URL:
 
 ```sh
-$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100:5001
+$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://localhost:8080
 ```
 
 Build the images:
@@ -90,7 +77,41 @@ Start the containers:
 $ docker-compose up -d
 ```
 
-And finally, connect to the machine at `http://192.168.99.100/`.
+Provision the database:
+
+```sh
+$ docker-compose run metagenscope-service python manage.py recreate_db
+$ docker-compose run metagenscope-service python manage.py seed_db
+```
+
+And finally, connect to the machine at `http://localhost:8080/`.
+
+### Docker Machine
+
+Optionally, you can create a `dev` Docker machine to work on:
+
+```sh
+$ docker-machine create -d virtualbox dev
+$ eval "$(docker-machine env dev)"
+```
+
+Make note of the IP address of the machine (usually `192.168.99.100`):
+
+```sh
+$ docker-machine ip dev
+```
+
+Then continue with the steps above:
+
+```sh
+$ export REACT_APP_METAGENSCOPE_SERVICE_URL=http://192.168.99.100:8080
+$ docker-compose build
+$ docker-compose up -d
+$ docker-compose run metagenscope-service python manage.py recreate_db
+$ docker-compose run metagenscope-service python manage.py seed_db
+```
+
+Connecting to the machine at `http://192.168.99.100:8080/`.
 
 ## Development
 
@@ -102,22 +123,22 @@ Testing is done per-service in their own repositories. This allows each service 
 
 ## Deploying
 
-First, connect to the production machine and clone this repository.
+First, connect to the production machine and clone _just this repository_ (you do not need `metagenscope-server` and `metagenscope-client`).
 
 Next, set production environment variables in a `.env` file:
 
 ```
-GITHUB_TOKEN=YourGithubTokenHere
 SECRET_KEY=AVerySecretKeyIndeed
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
-REACT_APP_METAGENSCOPE_SERVICE_URL=http://metagenscope.com
+MONGO_INITDB_ROOT_USERNAME=metagenscope
+MONGO_INITDB_ROOT_PASSWORD=metagenscope
 ```
 
 Spin up the containers:
 
 ```sh
-$ docker-compose -f docker-compose.prod.yml up -d --build
+$ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 Create and seed the database the first time it is deployed:

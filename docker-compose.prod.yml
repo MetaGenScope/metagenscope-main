@@ -154,11 +154,7 @@ services:
     restart: always
     ports:
       # Nginx reverse proxy is the only public port exposure
-      - 80:80
-      - 443:443
-    volumes:
-      - certs:/etc/letsencrypt
-      - certs-data:/data/letsencrypt
+      - 8080:8080
     depends_on:
       - metagenscope-service
       - web-service
@@ -169,10 +165,6 @@ services:
 volumes:
   mongo-data:
   postgresql-data:
-  certs:
-    driver: local
-  certs-data:
-    driver: local
 
 networks:
   public:

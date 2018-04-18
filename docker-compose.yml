@@ -144,12 +144,10 @@ services:
 
   nginx:
     container_name: nginx
-    build:
-      context: ./nginx/
-      dockerfile: Dockerfile-local
+    build: ./nginx/
     restart: always
     ports:
-      - 80:80
+      - 8080:8080
     depends_on:
       - metagenscope-service
       - web-service
