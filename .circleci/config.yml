@@ -29,7 +29,7 @@ jobs:
             NGINX_SERVICE: metagenscope-nginx
           command: |
             export NGINX_SERVICE_REPO=https://${GITHUB_TOKEN}@github.com/bchrobot/metagenscope-main.git#master:nginx
-            docker build $NGINX_SERVICE_REPO -t $NGINX_SERVICE:$COMMIT
+            docker build --no-cache $NGINX_SERVICE_REPO -t $NGINX_SERVICE:$COMMIT
             docker tag $NGINX_SERVICE:$COMMIT $DOCKER_ORG/$NGINX_SERVICE:$TAG
             docker push $DOCKER_ORG/$NGINX_SERVICE
 
