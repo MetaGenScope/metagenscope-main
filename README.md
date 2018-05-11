@@ -10,9 +10,6 @@ MetaGenScope runs as a collection of microservices using Docker. This makes it v
 1. [Running Locally](#running-locally)
     1. [Docker Machine](#docker-machine)
 1. [Testing](#testing)
-    1. [Writing Tests](#writing-tests)
-    1. [Standalone](#standalone)
-    1. [Dockerized](#dockerized)
 1. [Deploying](#deploying)
 1. [Meta](#meta)
 
