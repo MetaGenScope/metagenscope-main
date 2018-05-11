@@ -170,5 +170,5 @@ See also the list of [contributors][contributors] who participated in this proje
 This project is licensed under the MIT License - see the [`LICENSE.md`](LICENSE.md) file for details.
 
 
-[project-tags]: https://github.com/bchrobot/metagenscope-main/tags
-[contributors]: https://github.com/bchrobot/metagenscope-main/contributors
+[project-tags]: https://github.com/metagenscope/metagenscope-main/tags
+[contributors]: https://github.com/metagenscope/metagenscope-main/contributors
